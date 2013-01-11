@@ -11,4 +11,13 @@ func main() {
 		fmt.Println(er)
 		return	
 	}
+
+	adapter, er := cec.GetFirstAdapter()
+	if er != nil {
+		fmt.Println(er)
+		return
+	}
+
+	fmt.Println(adapter)
+
 }
