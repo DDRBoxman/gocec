@@ -2,14 +2,7 @@ package cec
 
 /*
 #cgo pkg-config: libcec
-#include <stdlib.h> 
-#include <stdio.h>
-#include <libcec/cecc.h>
-
-void setName(libcec_configuration conf, char *name) {
-	snprintf(conf.strDeviceName, 13, "%s", name);
-}
-
+#include "cec.h"
 */
 import "C"
 import "errors"
@@ -23,11 +16,18 @@ type CECAdapter struct {
 	Comm string
 }
 
+//export logCallback
+func logCallback(message C.cec_log_message) {
+	text := C.GoString(&message.message[0])
+	println(text)
+}
+
 func Init(config CECConfiguration) error {
 
 	var conf C.libcec_configuration
 	
-	C.setName(conf, C.CString(config.DeviceName))
+	C.setName(&conf, C.CString(config.DeviceName))
+	C.setupCallbacks(&conf)
 
 	result := C.cec_initialise(&conf)
 	if result < 1 {
@@ -52,6 +52,16 @@ func GetFirstAdapter() (CECAdapter, error) {
 	adapter.Comm = C.GoStringN(&device.comm[0], 1024)
 
 	return adapter, nil
+}
+
+func Open(adapter CECAdapter) error {
+	
+	result := C.cec_open(C.CString(adapter.Comm), 1000)
+	if result < 1 {
+		return errors.New("Failed to open adapter")
+	}
+
+	return nil
 }
 
 func PingAdapters() bool {

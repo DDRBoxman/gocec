@@ -20,4 +20,9 @@ func main() {
 
 	fmt.Println(adapter)
 
+	er = cec.Open(adapter)
+	if er != nil {
+		fmt.Println(er)
+		return
+	}
 }
